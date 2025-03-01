@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cube with Mouse Interaction</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Canvas element where Three.js renders the 3D scene -->
+    <canvas id="myCanvas"></canvas>
+
+    <!-- Import Three.js using the importmap -->
+    <script type="module">
+        import * as THREE from 'three';
+
+        // Set up basic Three.js scene
+        const canvas = document.getElementById('myCanvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement); // Attach canvas to body
+
+        // Create a simple 3D cube (with color for faces)
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        // Create a wireframe (grey borders) for the cube
+        const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0x808080 });  // Grey color for the borders
+        const edges = new THREE.EdgesGeometry(geometry); // Geometry for edges
+        const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
+        scene.add(wireframe); // Add the wireframe edges to the scene
+
+        // Set camera position so it's looking at the cube
+        camera.position.z = 5;
+
+        // Mouse movement interaction: Rotate the cube based on mouse movement
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Normalize mouse coordinates to the range [-1, 1]
+        window.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth);
+            mouseY = (event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Update cube rotation based on mouse movement
+        function update() {
+            // Rotate the cube based on normalized mouse coordinates
+            cube.rotation.x = mouseY * Math.PI; // Adjust sensitivity with Math.PI
+            cube.rotation.y = mouseX * Math.PI; // Adjust sensitivity with Math.PI
+            wireframe.rotation.x = cube.rotation.x;  // Keep wireframe in sync with cube rotation
+            wireframe.rotation.y = cube.rotation.y;  // Keep wireframe in sync with cube rotation
+        }
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Update cube and wireframe rotation before rendering
+            update();
+
+            // Render the scene from the camera's perspective
+            renderer.render(scene, camera);
+        }
+
+        // Resize handler to adjust camera and renderer on window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start the animation and rendering loop
+        animate();
+    </script>
+</body>
+</html>
